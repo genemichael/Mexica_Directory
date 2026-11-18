@@ -1,5 +1,5 @@
 // App shell: cache-first, refreshed in the background. Wikimedia images: cache-first, saved on first view.
-const SHELL = "aztec-shell-v1";
+const SHELL = "aztec-shell-v2";
 const IMGS = "aztec-img-v1";
 const SHELL_FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
