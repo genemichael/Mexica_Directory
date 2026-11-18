@@ -25,4 +25,4 @@ Codex images are public-domain reproductions hosted on Wikimedia Commons. Two ph
 
 ## Updating
 
-Edit `index.html` and upload it again. When you change files, also change `aztec-shell-v2` to `aztec-shell-v3` in `sw.js` so phones pick up the new version.
+Edit `index.html` and upload it again. When you change files, also change `aztec-shell-v3` to `aztec-shell-v4` in `sw.js` so phones pick up the new version.
