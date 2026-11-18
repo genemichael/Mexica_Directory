@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d6b58">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aztec Who's Who">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Aztec Who's Who</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky search + filter chips, two diagrams (Five Suns, ruler line), then a filterable card list. Mobile first. */
+:root{
+  --bg:#eef0ec; --surface:#ffffff; --ink:#1c2420; --muted:#5b665f; --line:#d5dbd5;
+  --jade:#0d6b58; --god:#a8253a; --sun:#a86a06; --ruler:#0d6b58; --person:#3a4f9a; --place:#5a6470;
+  --chip:#e3e8e3;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --surface:#1b211e; --ink:#e7ece8; --muted:#9aa69f; --line:#2c3531;
+    --jade:#4fc2a6; --god:#f07a8c; --sun:#e5b04a; --ruler:#4fc2a6; --person:#93a8f2; --place:#a9b3bd;
+    --chip:#252d29; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --surface:#1b211e; --ink:#e7ece8; --muted:#9aa69f; --line:#2c3531;
+  --jade:#4fc2a6; --god:#f07a8c; --sun:#e5b04a; --ruler:#4fc2a6; --person:#93a8f2; --place:#a9b3bd;
+  --chip:#252d29; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding:env(safe-area-inset-top) max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+header{padding:22px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,7vw,40px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:65ch}
+h2{font-family:var(--display);font-weight:600;font-size:21px;margin:26px 0 10px;text-wrap:balance}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+.search{width:100%;font:inherit;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.search:focus-visible,.chip:focus-visible,.rel:focus-visible{outline:3px solid var(--jade);outline-offset:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+.chip{flex:none;font:inherit;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:14px}
+.key b{font-family:var(--display);font-weight:600}
+.key ul{margin:6px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 16px;font-size:15.5px}
+.key code{font-family:var(--body);font-weight:700;color:var(--jade)}
+.suns{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:10px;overflow-x:auto;padding-bottom:6px}
+.sunc{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--sun);border-radius:12px;padding:12px}
+.sunc .n{font-family:var(--display);font-weight:800;color:var(--sun);font-size:15px;letter-spacing:.04em}
+.sunc h3{margin:2px 0 4px;font-size:18px}
+.sunc p{margin:2px 0;font-size:15px}
+.sunc .k{color:var(--muted)}
+.sunc.now{border-top-width:6px}
+.note{color:var(--muted);font-size:15px;margin:6px 0 0;max-width:65ch}
+.rulers{list-style:none;margin:0;padding:0;border-left:3px solid var(--ruler);margin-left:6px}
+.rulers li{position:relative;padding:4px 0 8px 18px}
+.rulers li::before{content:"";position:absolute;left:-8px;top:11px;width:13px;height:13px;border-radius:50%;background:var(--surface);border:3px solid var(--ruler)}
+.rulers .yr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;display:inline-block;min-width:92px}
+.rulers .nm{font-weight:700}
+.rulers .ds{color:var(--muted);font-size:15px}
+.count{color:var(--muted);font-size:15px;margin:0 0 8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.chead{display:flex;gap:12px;align-items:center}
+.glyph{flex:none;width:56px;height:56px;border-radius:12px;background:color-mix(in srgb,var(--c) 13%,var(--surface));color:var(--c);display:grid;place-items:center}
+.glyph svg{width:46px;height:46px}
+.sg{width:40px;height:40px;color:var(--sun);display:block;margin-bottom:4px}
+.rulers .ri{width:22px;height:22px;color:var(--ruler);vertical-align:-5px;margin-right:4px}
+.card h3{margin:0;font-family:var(--display);font-weight:600;font-size:20px;line-height:1.2}
+.alt{color:var(--muted);font-size:15px}
+.say{font-size:15px}
+.say span{font-weight:700;letter-spacing:.02em}
+.means{font-size:15px;font-style:italic;color:var(--muted)}
+.role{margin:2px 0 0;font-size:16px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px}
+.tag{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--c)}
+.book{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.rel{font:inherit;font-size:14px;background:var(--chip);border:0;border-radius:6px;padding:2px 8px;color:var(--ink);cursor:pointer}
+.rel:hover{text-decoration:underline}
+.fig{margin:6px 0 2px;display:flex;flex-direction:column;gap:4px}
+.fig button{padding:0;border:1px solid var(--line);border-radius:10px;background:#f3efe6;overflow:hidden;cursor:zoom-in;display:block;width:100%}
+.fig img{display:block;width:100%;height:190px;object-fit:contain;background:#f3efe6}
+.fig figcaption{font-size:13px;color:var(--muted);line-height:1.35}
+.fig figcaption a{color:var(--muted)}
+.sunfig{margin:12px 0 0}
+.sunfig img{height:auto;max-height:340px}
+.lb{position:fixed;inset:0;z-index:20;background:rgba(10,12,11,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom))}
+.lb img{max-width:100%;max-height:80vh;object-fit:contain;background:#f3efe6;border-radius:8px}
+.lb p{color:#e7ece8;font-size:15px;margin:0;max-width:65ch;text-align:center}
+.lb a{color:#9fe0cf}
+.lb .x{font:inherit;font-weight:700;background:#e7ece8;color:#121614;border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+.offline{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:10px;font-size:15px;color:var(--muted)}
+.offline button{font:inherit;font-size:15px;font-weight:600;border:1px solid var(--jade);color:var(--jade);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer}
+.hide{display:none!important}
+.empty{color:var(--muted)}
+footer{margin-top:28px;color:var(--muted);font-size:14px;max-width:65ch}
+@media (prefers-reduced-motion: no-preference){.card{transition:border-color .15s}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-two" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="24" r="10"/><circle cx="30" cy="24" r="10"/></symbol><symbol id="i-mirror" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="30" r="11"/><circle cx="24" cy="30" r="5"/><path d="M18 16c-3-3 1-6-2-9M24 16c-3-3 1-6-2-9M30 16c-3-3 1-6-2-9"/></symbol><symbol id="i-featherserpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 32c6-10 12 10 18 0s12 10 18 0"/><circle cx="41" cy="31" r="1.5" fill="currentColor"/><path d="M10 27l-3-9M17 31l-1-10M25 27l1-9M33 31l2-10"/></symbol><symbol id="i-hummingbird" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17l13 5"/><circle cx="21" cy="23" r="4"/><path d="M24 25c6 0 10 4 12 10l-8-2-5-6"/><path d="M23 20c4-8 10-10 17-10-4 6-8 10-14 12"/></symbol><symbol id="i-sprout" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40V22"/><path d="M24 26c-6-2-9-7-9-12 5 0 9 4 9 10M24 24c6-2 9-7 9-12-5 0-9 4-9 10"/><path d="M14 40h20"/><path d="M16 40c-2-6-2-10 2-14M32 40c2-6 2-10-2-14"/></symbol><symbol id="i-tlaloc" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="19" r="6"/><circle cx="32" cy="19" r="6"/><path d="M11 31c4 3 22 3 26 0M18 32v7M24 33v8M30 32v7"/></symbol><symbol id="i-waterskirt" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10h18l7 24H8z"/><path d="M11 22h26"/><path d="M16 44c0-2 2-3 2-5M24 44c0-2 2-3 2-5M32 44c0-2 2-3 2-5"/></symbol><symbol id="i-wind" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 24c0-8 6-14 14-14s12 6 12 12-4 10-10 10-8-4-8-8 3-6 6-6"/><path d="M33 37h9M28 42h12"/></symbol><symbol id="i-skull" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c0-8 5-13 12-13s12 5 12 13c0 5-2 8-5 9v6H17v-6c-3-1-5-4-5-9z"/><circle cx="19" cy="22" r="3.5"/><circle cx="29" cy="22" r="3.5"/><path d="M22 37v-4M26 37v-4"/></symbol><symbol id="i-skullhair" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c0-8 5-13 12-13s12 5 12 13c0 5-2 8-5 9v6H17v-6c-3-1-5-4-5-9z"/><circle cx="19" cy="22" r="3.5"/><circle cx="29" cy="22" r="3.5"/><path d="M8 16c-3 7-3 16 0 24M40 16c3 7 3 16 0 24"/></symbol><symbol id="i-dog" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 21L11 7l8 6M34 21l3-14-8 6"/><path d="M14 19c0-4 4-6 10-6s10 2 10 6v7c0 8-5 14-10 14s-10-6-10-14z"/><circle cx="19" cy="24" r="1.6" fill="currentColor"/><circle cx="29" cy="24" r="1.6" fill="currentColor"/><path d="M21 33h6"/></symbol><symbol id="i-sunfire" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7"/><path d="M24 4v3M13 8l2 2M35 8l-2 2M9 17h3M36 17h3"/><path d="M14 42c-2-6 4-8 3-13 4 3 5 6 4 9 2-2 2-5 1-7 5 4 7 8 5 11M10 42h28"/></symbol><symbol id="i-moonrabbit" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M30 8a16 16 0 1 0 0 32 12 12 0 1 1 0-32z"/><path d="M19 22l-2-7M22 21l1-7"/><circle cx="21" cy="26" r="3.5"/></symbol><symbol id="i-sun" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="8"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/></symbol><symbol id="i-croc" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21h29l9 4-9 4H5"/><path d="M9 21l2 3 2-3 2 3 2-3 2 3 2-3 2 3 2-3M9 29l2-3 2 3 2-3 2 3 2-3 2 3 2-3 2 3"/><circle cx="32" cy="17" r="2"/></symbol><symbol id="i-earthjaw" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 40h36"/><path d="M10 35c0-12 6-20 14-20s14 8 14 20"/><path d="M15 35l3-5 3 5 3-5 3 5 3-5 3 5"/><circle cx="19" cy="23" r="2"/><circle cx="29" cy="23" r="2"/></symbol><symbol id="i-serpentskirt" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 9h18l6 31H9z"/><path d="M12 19c4 3 8-3 12 0s8-3 12 0M11 30c4 3 9-3 13 0s9-3 13 0"/></symbol><symbol id="i-bells" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M30 6a11 11 0 1 0 9 16"/><path d="M10 34a6 6 0 0 1 12 0v4H10zM26 34a6 6 0 0 1 12 0v4H26z"/><circle cx="16" cy="41" r="1.5"/><circle cx="32" cy="41" r="1.5"/></symbol><symbol id="i-stars" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8v6M7 11h6M24 5v6M21 8h6M38 10v6M35 13h6M15 24v6M12 27h6M33 25v6M30 28h6M24 37v6M21 40h6M8 38v4M6 40h4M40 38v4M38 40h4"/></symbol><symbol id="i-flame" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 42c-8 0-12-5-12-11 0-8 8-10 8-20 6 4 7 10 6 14 3-2 4-5 4-8 4 4 6 9 6 14 0 6-4 11-12 11z"/></symbol><symbol id="i-maguey" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40V12M24 40L12 14M24 40l12-26M24 40L5 26M24 40l19-14M24 40L8 36M24 40l16-4M6 42h36"/></symbol><symbol id="i-corn" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5c6 0 8 8 8 18s-4 15-8 15-8-5-8-15 2-18 8-18z"/><path d="M17 16h14M16 24h16M17 32h14M24 6v32"/><path d="M16 30c-6 2-8 8-8 13M32 30c6 2 8 8 8 13"/></symbol><symbol id="i-sevenserpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="2" fill="currentColor"/><circle cx="14" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/><circle cx="24" cy="12" r="2" fill="currentColor"/><circle cx="29" cy="12" r="2" fill="currentColor"/><circle cx="34" cy="12" r="2" fill="currentColor"/><circle cx="39" cy="12" r="2" fill="currentColor"/><path d="M6 32c6-8 12 8 18 0s12 8 18 0"/><circle cx="41" cy="31" r="1.5" fill="currentColor"/></symbol><symbol id="i-flowerfeather" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="18" r="3"/><circle cx="17" cy="11" r="4"/><circle cx="23.5" cy="16" r="4"/><circle cx="21" cy="24" r="4"/><circle cx="13" cy="24" r="4"/><circle cx="10.5" cy="16" r="4"/><path d="M17 28v14"/><path d="M33 43c-2-10 0-24 7-33 2 10 0 23-7 33zM37 22l-4-2M36 30l-4-2"/></symbol><symbol id="i-flower" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="19" r="4"/><circle cx="24" cy="10" r="5"/><circle cx="32.5" cy="16" r="5"/><circle cx="29.5" cy="26" r="5"/><circle cx="18.5" cy="26" r="5"/><circle cx="15.5" cy="16" r="5"/><path d="M24 31v13M24 38c4-4 8-4 10-2"/></symbol><symbol id="i-broom" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 5L22 27"/><path d="M15 25l13 5-4 14H8z"/><path d="M13 33l1 11M18 34l1 10"/></symbol><symbol id="i-butterfly" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 14v24"/><path d="M24 20L7 7l5 14-5 5 17-3M24 20L41 7l-5 14 5 5-17-3M24 28L12 39l12-4M24 28l12 11-12-4"/><path d="M22 14l-3-6M26 14l3-6"/></symbol><symbol id="i-cloud" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 31a7 7 0 0 1 2-13 9 9 0 0 1 17-3 7 7 0 0 1 5 16z"/><path d="M8 40c6-4 10 4 16 0s10 4 16 0"/></symbol><symbol id="i-venus" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 38h36"/><path d="M24 8l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/></symbol><symbol id="i-coil" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 41c-10 0-14-6-14-12s6-10 14-10 10 4 10 8-4 6-8 6-6-2-6-5"/><path d="M34 27c4-4 6-8 6-13"/><circle cx="39" cy="11" r="3"/></symbol><symbol id="i-handreeds" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 24V6M22 24V4M28 24V5M34 24V8"/><path d="M11 24h26c0 10-4 17-13 17s-13-7-13-17z"/></symbol><symbol id="i-feather" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 43L32 7c6 10 2 24-12 31z"/><path d="M22 30l9-1M26 23l7-1M18 36l6 0"/></symbol><symbol id="i-smokeshield" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="29" r="13"/><path d="M11 29h26M24 16v26"/><path d="M15 12c-2-3 2-5 0-8M24 12c-2-3 2-5 0-8M33 12c-2-3 2-5 0-8"/></symbol><symbol id="i-obsidianserpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c6-8 12 8 18 0s12 8 18 0"/><path d="M9 24l3-7 3 7M21 32l3-7 3 7M33 24l3-7 3 7"/><circle cx="41" cy="29" r="1.5" fill="currentColor"/></symbol><symbol id="i-arrowsky" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18A22 22 0 0 1 22 5"/><path d="M8 40L38 10"/><path d="M28 9h11v11"/><path d="M8 40l1-8M8 40l8-1"/></symbol><symbol id="i-waterface" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="18" r="10"/><circle cx="20" cy="16" r="1.6" fill="currentColor"/><circle cx="28" cy="16" r="1.6" fill="currentColor"/><path d="M20 22h8"/><path d="M6 34c4-3 8 3 12 0s8 3 12 0 8 3 12 0M6 41c4-3 8 3 12 0s8 3 12 0 8 3 12 0"/></symbol><symbol id="i-leg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5v21l-4 15h17"/><path d="M28 5v21l-2 9"/><path d="M19 15h9"/></symbol><symbol id="i-watercreature" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 30c4-10 14-14 24-10l8-4-2 8c2 4 0 10-6 12H14z"/><path d="M15 22l-2-6M21 19l-1-6M27 18l1-6"/><circle cx="33" cy="25" r="1.5" fill="currentColor"/><path d="M6 42c4-3 8 3 12 0s8 3 12 0 8 3 12 0"/></symbol><symbol id="i-diadem" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 36h28l-2-10H22L14 10l-3 16z"/><path d="M35 27l7 5"/><path d="M14 30h18"/></symbol><symbol id="i-lakereeds" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 24c4-3 8 3 12 0s8 3 12 0 8 3 12 0M6 32c4-3 8 3 12 0s8 3 12 0 8 3 12 0M6 40c4-3 8 3 12 0s8 3 12 0 8 3 12 0"/><path d="M13 23V7M19 22V11M33 23V7M13 7l-3 4M33 7l3 4"/></symbol><symbol id="i-eagledown" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6c-9 0-13 6-13 12 0 8 6 12 10 18l3 6 3-6c4-6 10-10 10-18 0-6-4-12-13-12z"/><circle cx="19" cy="17" r="2" fill="currentColor"/><path d="M18 26c4 2 8 2 12 0"/></symbol><symbol id="i-shieldflower" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="21" cy="27" r="13"/><path d="M8 27h26M21 14v26"/><circle cx="37" cy="11" r="2.5"/><circle cx="37" cy="5.5" r="3"/><circle cx="42.5" cy="11" r="3"/><circle cx="37" cy="16.5" r="3"/><circle cx="31.5" cy="11" r="3"/></symbol><symbol id="i-cactusrock" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 42h28l-4-8H14z"/><ellipse cx="24" cy="24" rx="6" ry="8"/><ellipse cx="14" cy="15" rx="4" ry="6"/><ellipse cx="34" cy="14" rx="4" ry="6"/><circle cx="24" cy="15" r="1.5" fill="currentColor"/></symbol><symbol id="i-stone" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 37l6-16 12-9 12 6 5 19z"/><path d="M17 24l5 3M31 24l-5 3"/><path d="M20 32h8"/></symbol><symbol id="i-cloth" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10h28"/><path d="M17 10v30l7-7 7 7V10"/></symbol><symbol id="i-heart" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40C10 30 6 22 10 15c3-5 10-5 14 1 4-6 11-6 14-1 4 7 0 15-14 25z"/></symbol><symbol id="i-coyote" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 20L12 5l8 9h8l8-9-2 15"/><path d="M14 20c0 6 4 10 10 19 6-9 10-13 10-19"/><circle cx="19" cy="22" r="1.6" fill="currentColor"/><circle cx="29" cy="22" r="1.6" fill="currentColor"/><path d="M12 27h24"/></symbol><symbol id="i-doll" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="11" r="6"/><path d="M14 42l4-23h12l4 23z"/><path d="M18 24h-7M30 24h7"/><circle cx="24" cy="30" r="3.5" fill="currentColor"/></symbol><symbol id="i-person" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="14" r="7"/><path d="M10 42c0-10 6-16 14-16s14 6 14 16"/></symbol><symbol id="i-speech" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 40c0-15 9-28 22-28 6 0 9 4 9 8s-4 8-9 6c-3-1-3-5 0-6"/><path d="M18 34c0-6 4-11 9-11"/></symbol><symbol id="i-ship" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 32h38l-6 9H11z"/><path d="M22 32V5M22 7l15 11-15 4M22 9L9 22l13 4"/></symbol><symbol id="i-sword" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M36 5L15 29"/><path d="M10 25l13 13M13 36l-7 7"/></symbol><symbol id="i-bee" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="24" cy="29" rx="8" ry="11"/><path d="M16 27h16M17 33h14"/><path d="M18 19c-6-6-12-4-12 2s8 4 12 2M30 19c6-6 12-4 12 2s-8 4-12 2"/><path d="M21 18l-3-7M27 18l3-7"/></symbol><symbol id="i-child" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="5"/><path d="M15 41c0-8 4-13 9-13s9 5 9 13"/><path d="M8 41c0-6 2-10 6-12"/></symbol><symbol id="i-staff" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M33 6v36"/><circle cx="33" cy="8" r="3"/><circle cx="17" cy="15" r="6"/><path d="M6 42c0-9 5-15 11-15s9 4 11 8"/></symbol><symbol id="i-book" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h15c2 0 2 2 2 2v28s0-2-2-2H7zM41 10H26c-2 0-2 2-2 2v28s0-2 2-2h15z"/><path d="M11 18h8M11 24h8M11 30h6M29 18h8M29 24h8M29 30h6"/></symbol><symbol id="i-eaglecactus" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 43h28"/><path d="M24 43V33"/><ellipse cx="18" cy="34" rx="4" ry="5"/><ellipse cx="30" cy="34" rx="4" ry="5"/><path d="M13 22c3-9 18-9 22 0l6-7-2 11-5 2H15z"/><path d="M13 22l-6-3 6-1"/></symbol><symbol id="i-heron" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 41c6-3 12 3 18 0s12 3 18 0"/><path d="M13 37c3-4 19-4 22 0"/><path d="M25 34V20c0-5 4-7 7-5l7-2-7 5"/><path d="M25 26c-4 0-6 3-6 6"/></symbol><symbol id="i-basket" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h32l-4 18H12z"/><path d="M14 22c0-8 4-12 10-12s10 4 10 12"/><path d="M11 30h26M18 22l-2 18M30 22l2 18"/></symbol><symbol id="i-hill" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 40c0-14 4-28 14-28s14 14 14 28z"/><path d="M7 40h34"/><path d="M13 33h22"/><circle cx="24" cy="24" r="2"/></symbol><symbol id="i-three" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="18" r="8"/><circle cx="32" cy="18" r="8"/><circle cx="24" cy="31" r="8"/></symbol><symbol id="i-ant" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="13" cy="24" rx="5" ry="4"/><circle cx="23" cy="24" r="3"/><ellipse cx="34" cy="24" rx="6" ry="5"/><path d="M20 22l-4-8M23 21v-8M27 22l4-8M20 26l-4 8M23 27v8M27 26l4 8M9 22l-4-5"/></symbol><symbol id="i-grasshopperhill" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 43c0-10 6-17 16-17s16 7 16 17z"/><path d="M13 19c4-4 14-4 19 0l-4 3H16z"/><path d="M28 19l7-11 2 13"/><path d="M17 22l-2 4M23 22v4"/><circle cx="14" cy="19" r="1.5" fill="currentColor"/></symbol><symbol id="i-benthill" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 41c0-14 4-23 12-23 6 0 8-4 6-9 6 2 10 8 8 14-2 4 0 10 2 18z"/><path d="M7 41h34"/></symbol><symbol id="i-tortilla" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="24" cy="31" rx="17" ry="6"/><ellipse cx="24" cy="24" rx="17" ry="6"/><circle cx="17" cy="24" r="1.2" fill="currentColor"/><circle cx="28" cy="22" r="1.2" fill="currentColor"/><circle cx="24" cy="26" r="1.2" fill="currentColor"/><path d="M14 13c2-3 6-3 8 0M26 13c2-3 6-3 8 0"/></symbol><symbol id="i-pyramid" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 41h38M9 41l4-8h22l4 8M13 33l3-8h16l3 8M16 25l3-8h10l3 8M19 17l2-5h6l2 5"/><path d="M24 41V31"/></symbol><symbol id="i-serpenthill" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 41c0-14 4-28 14-28s14 14 14 28z"/><path d="M7 41h34"/><path d="M14 27c4-4 7 4 10 0s7 4 10 0"/><circle cx="35" cy="26" r="1.3" fill="currentColor"/></symbol><symbol id="i-stairsdown" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h7v5h6v5h6v5h6v5h6v5h6"/><path d="M6 42h36"/><circle cx="12" cy="30" r="4"/><path d="M10 34v3M14 34v3"/></symbol><symbol id="i-drop" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5c-6 10-11 16-11 23a11 11 0 0 0 22 0c0-7-5-13-11-23z"/><path d="M24 36v-9M24 31l-4-3M24 29l4-3"/></symbol><symbol id="i-tree" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 43V23"/><path d="M24 23c-10 0-15-6-13-12 4 2 9 2 13-3 4 5 9 5 13 3 2 6-3 12-13 12z"/><path d="M15 43h18M24 31l-6-4M24 33l6-4"/></symbol><symbol id="i-watermountain" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 32c0-12 4-22 12-22s12 10 12 22z"/><path d="M6 38c4-3 8 3 12 0s8 3 12 0 8 3 12 0M6 44c4-3 8 3 12 0s8 3 12 0 8 3 12 0"/></symbol><symbol id="i-twofig" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 8l5-5 5 5"/><circle cx="16" cy="15" r="5"/><path d="M7 40c0-9 4-15 9-15s9 6 9 15"/><circle cx="33" cy="20" r="4"/><path d="M26 40c0-8 3-13 7-13s7 5 7 13"/></symbol><symbol id="i-newfire" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 43h22M15 43V30M19 43V30M24 43V30M29 43V30M33 43V30M13 36h22"/><path d="M24 26c-4 0-6-3-6-6 0-4 4-6 4-11 3 2 4 6 3 8 2-1 2-3 2-5 2 2 3 6 3 8 0 3-2 6-6 6z"/></symbol><symbol id="i-calendar" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="8"/><path d="M24 7v6M24 35v6M7 24h6M35 24h6M12 12l4 4M32 32l4 4M36 12l-4 4M16 32l-4 4"/></symbol></defs></svg>
+<div class="wrap">
+<header>
+  <h1>Aztec Who's Who</h1>
+  <p class="sub">A listening companion for <i>Fifth Sun</i> (Camilla Townsend) and <i>Myths, Gods, and Rituals of Aztec Mythology</i> (Matthew Torres). Type any name you just heard, even half-spelled.</p>
+  <div class="offline"><button id="savebtn" type="button">Save images for offline</button><span id="savemsg">Images load from Wikimedia Commons. Save them once to use the app with no signal.</span></div>
+</header>
+
+<div class="bar">
+  <label for="q" class="hide">Search names</label>
+  <input id="q" class="search" type="search" placeholder="Search a name, meaning, or role (e.g. mirror, moon, Tlatelolco)" autocomplete="off">
+  <div class="chips" role="group" aria-label="Filter by kind">
+    <button class="chip" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" data-f="god" aria-pressed="false"><span class="dot" style="background:var(--god)"></span>Gods</button>
+    <button class="chip" data-f="ruler" aria-pressed="false"><span class="dot" style="background:var(--ruler)"></span>Mexica rulers</button>
+    <button class="chip" data-f="person" aria-pressed="false"><span class="dot" style="background:var(--person)"></span>Other people</button>
+    <button class="chip" data-f="place" aria-pressed="false"><span class="dot" style="background:var(--place)"></span>Places &amp; terms</button>
+  </div>
+</div>
+
+<section id="intro">
+  <div class="key">
+    <b>Reading Nahuatl names</b>
+    <ul>
+      <li><code>x</code> = "sh" (Xolotl = SHOH-lohtl)</li>
+      <li><code>hu</code>, <code>uh</code> = "w" (Ahuitzotl = ah-WEET-sohtl)</li>
+      <li><code>qu</code> before e/i = "k"; <code>cu</code> = "kw"</li>
+      <li><code>z</code>, <code>tz</code> = "s", "ts"</li>
+      <li><code>tl</code> = one sound, a soft "t" with an "l"</li>
+      <li>Stress the second-to-last syllable</li>
+      <li><code>-tzin</code> = respectful ending ("dear, honored")</li>
+      <li><code>-tecuhtli</code> = lord; <code>-cihuatl</code> = lady</li>
+    </ul>
+  </div>
+
+  <h2>The Five Suns: the four ages before ours</h2>
+  <div class="suns">
+    <div class="sunc"><div class="n">SUN 1 · 4 JAGUAR</div><svg class="sg" aria-hidden="true"><use href="#i-mirror"/></svg><h3>Tezcatlipoca</h3><p><span class="k">People:</span> giants</p><p><span class="k">End:</span> eaten by jaguars</p></div>
+    <div class="sunc"><div class="n">SUN 2 · 4 WIND</div><svg class="sg" aria-hidden="true"><use href="#i-featherserpent"/></svg><h3>Quetzalcoatl</h3><p><span class="k">People:</span> blown away by hurricanes</p><p><span class="k">End:</span> survivors became monkeys</p></div>
+    <div class="sunc"><div class="n">SUN 3 · 4 RAIN</div><svg class="sg" aria-hidden="true"><use href="#i-tlaloc"/></svg><h3>Tlaloc</h3><p><span class="k">People:</span> rained on by fire</p><p><span class="k">End:</span> survivors became turkeys/birds</p></div>
+    <div class="sunc"><div class="n">SUN 4 · 4 WATER</div><svg class="sg" aria-hidden="true"><use href="#i-waterskirt"/></svg><h3>Chalchiuhtlicue</h3><p><span class="k">People:</span> drowned in a flood</p><p><span class="k">End:</span> survivors became fish</p></div>
+    <div class="sunc now"><div class="n">SUN 5 · 4 MOVEMENT · NOW</div><svg class="sg" aria-hidden="true"><use href="#i-sun"/></svg><h3>Nanahuatzin → Tonatiuh</h3><p><span class="k">Made at:</span> Teotihuacan, by sacrifice</p><p><span class="k">End:</span> foretold to end in earthquakes</p></div>
+  </div>
+  <p class="note">Rivalry between Tezcatlipoca and Quetzalcoatl drives the early ages. Sources disagree on the order and on which god ruled which Sun, so if Torres orders them differently, go with the book.</p>
+
+  <div id="sunfig"></div>
+
+  <h2>Rulers of Tenochtitlan, in order</h2>
+  <ul class="rulers">
+    <li><span class="yr">c.1375–1395</span> <svg class="ri" aria-hidden="true"><use href="#i-handreeds"/></svg><span class="nm">Acamapichtli</span> <span class="ds">first king, Culhua royal blood</span></li>
+    <li><span class="yr">c.1396–1417</span> <svg class="ri" aria-hidden="true"><use href="#i-feather"/></svg><span class="nm">Huitzilihuitl</span> <span class="ds">his son</span></li>
+    <li><span class="yr">c.1417–1427</span> <svg class="ri" aria-hidden="true"><use href="#i-smokeshield"/></svg><span class="nm">Chimalpopoca</span> <span class="ds">Huitzilihuitl's son, Tezozomoc's grandson</span></li>
+    <li><span class="yr">1427–1440</span> <svg class="ri" aria-hidden="true"><use href="#i-obsidianserpent"/></svg><span class="nm">Itzcoatl</span> <span class="ds">Acamapichtli's son by a low-status mother; broke the Tepanecs</span></li>
+    <li><span class="yr">1440–1469</span> <svg class="ri" aria-hidden="true"><use href="#i-arrowsky"/></svg><span class="nm">Moctezuma I</span> <span class="ds">Ilhuicamina, "the elder"</span></li>
+    <li><span class="yr">1469–1481</span> <svg class="ri" aria-hidden="true"><use href="#i-waterface"/></svg><span class="nm">Axayacatl</span> <span class="ds">conquered Tlatelolco, 1473</span></li>
+    <li><span class="yr">1481–1486</span> <svg class="ri" aria-hidden="true"><use href="#i-leg"/></svg><span class="nm">Tizoc</span> <span class="ds">Axayacatl's brother; short, weak reign</span></li>
+    <li><span class="yr">1486–1502</span> <svg class="ri" aria-hidden="true"><use href="#i-watercreature"/></svg><span class="nm">Ahuitzotl</span> <span class="ds">another brother; great expansion</span></li>
+    <li><span class="yr">1502–1520</span> <svg class="ri" aria-hidden="true"><use href="#i-diadem"/></svg><span class="nm">Moctezuma II</span> <span class="ds">Xocoyotzin, "the younger"; met Cortés</span></li>
+    <li><span class="yr">1520</span> <svg class="ri" aria-hidden="true"><use href="#i-lakereeds"/></svg><span class="nm">Cuitlahuac</span> <span class="ds">died of smallpox within months</span></li>
+    <li><span class="yr">1520–1525</span> <svg class="ri" aria-hidden="true"><use href="#i-eagledown"/></svg><span class="nm">Cuauhtemoc</span> <span class="ds">defended the city; hanged by Cortés</span></li>
+  </ul>
+  <p class="note">Dates before 1427 are approximate; the annals disagree.</p>
+</section>
+
+<h2 id="dirhead">Directory</h2>
+<p class="count" id="count"></p>
+<div class="cards" id="cards"></div>
+<p class="empty hide" id="empty">No match. Try fewer letters, since audiobook spellings vary (e.g. "moct" finds Moctezuma and Moteuczoma).</p>
+
+<div class="lb hide" id="lb" role="dialog" aria-modal="true" aria-label="Image viewer"><img id="lbimg" alt=""><p id="lbcap"></p><button class="x" id="lbx" type="button">Close</button></div>
+
+<footer>Pronunciations are approximate English guides. Townsend often gives English translations of names (Shield Flower, Jade Doll), so meanings are searchable too. Tap a gray related name to jump to it. The glyphs are original memory aids drawn in the spirit of Mexica name glyphs, which pictured what a name means; they are not copies of codex images. Codex images and photos are from Wikimedia Commons; tap a credit to see the source page and license.</footer>
+</div>
+
+<script>
+const D = [
+// ---------- GODS ----------
+["god","Ometeotl","Ometecuhtli & Omecihuatl","oh-meh-TEH-ohtl","Two God; Two Lord & Two Lady","The dual creator at the top of the heavens, male and female at once. Parent of the four Tezcatlipocas.","Myths",["Tezcatlipoca","Quetzalcoatl"]],
+["god","Tezcatlipoca","Black Tezcatlipoca, Smoking Mirror","tes-kah-tlee-POH-kah","Smoking Mirror","Night, sorcery, fate, and rulers. A trickster with an obsidian mirror that sees everything; often missing a foot, lost to the earth monster. Ruled the First Sun and is Quetzalcoatl's great rival.","Both",["Quetzalcoatl","Tlaltecuhtli","Cipactli"]],
+["god","Quetzalcoatl","Feathered Serpent; Ehecatl as wind god","ket-sahl-KOH-ahtl","Feathered (quetzal) Serpent","Wind, learning, priests, and craft. Ruled the Second Sun. Went to the underworld for the bones of past humans and bled on them to make people of the Fifth Sun. Also the name of a legendary Toltec priest-king.","Both",["Tezcatlipoca","Xolotl","Mictlantecuhtli","Ehecatl"]],
+["god","Huitzilopochtli","Blue Tezcatlipoca","weet-see-loh-POHCH-tlee","Hummingbird of the Left (South)","Patron god of the Mexica: sun and war. Led them from Aztlan. Born fully armed at Coatepec to defend his mother Coatlicue, he killed his sister Coyolxauhqui. Shared the Templo Mayor with Tlaloc.","Both",["Coatlicue","Coyolxauhqui","Centzon Huitznahua","Aztlan","Coatepec"]],
+["god","Xipe Totec","Red Tezcatlipoca","SHEE-peh TOH-tek","Our Lord the Flayed One","Spring, renewal, and goldsmiths. Wears a flayed human skin, like new growth bursting from an old husk.","Myths",["Tezcatlipoca"]],
+["god","Tlaloc","Tlaloque (his helpers)","TLAH-lok","Meaning debated","Rain, storms, and lightning. Ruled the Third Sun. His paradise is Tlalocan. Shared the Templo Mayor with Huitzilopochtli; his small helpers are the Tlaloque.","Both",["Chalchiuhtlicue","Tlalocan"]],
+["god","Chalchiuhtlicue","","chahl-chee-oo-TLEE-kweh","Jade Skirt","Lakes, rivers, and childbirth; Tlaloc's partner. Ruled the Fourth Sun, which ended in a flood.","Myths",["Tlaloc"]],
+["god","Ehecatl","Ehecatl-Quetzalcoatl","eh-EH-kahtl","Wind","Quetzalcoatl in his wind form, with a duck-bill mask. His breath sweeps the way for the rain.","Myths",["Quetzalcoatl"]],
+["god","Mictlantecuhtli","","meek-tlahn-teh-KOO-tlee","Lord of Mictlan","King of the dead, a skeleton figure. Tried to trick Quetzalcoatl out of the bones of earlier humans.","Myths",["Mictecacihuatl","Mictlan","Quetzalcoatl"]],
+["god","Mictecacihuatl","","meek-teh-kah-SEE-waht","Lady of Mictlan","Queen of the dead and keeper of the bones; Mictlantecuhtli's wife.","Myths",["Mictlantecuhtli","Mictlan"]],
+["god","Xolotl","","SHOH-lohtl","Monster / twin (a dog figure)","Dog-headed twin of Quetzalcoatl. Guides souls through the underworld and evening Venus. In some versions he flees being sacrificed when the Fifth Sun is made.","Myths",["Quetzalcoatl","Mictlan"]],
+["god","Nanahuatzin","Becomes Tonatiuh","nah-nah-WAHT-seen","The Little Pimply One","Humble, sore-covered god who leapt into the fire at Teotihuacan without hesitation and rose as the Sun of the Fifth Age.","Myths",["Tecuciztecatl","Tonatiuh","Teotihuacan"]],
+["god","Tecuciztecatl","Becomes the Moon","teh-koo-sees-TEH-kahtl","He of the Conch-Shell Place","Rich, proud god who hesitated four times before the fire, then jumped in after Nanahuatzin. Rose as a second sun, so the gods dimmed him by throwing a rabbit at his face.","Myths",["Nanahuatzin","Teotihuacan"]],
+["god","Tonatiuh","","toh-NAH-tee-oo","He Who Goes Forth Shining","The sun of our age, the face at the center of the 'Aztec Calendar' Sun Stone. Needs blood and hearts to keep moving.","Both",["Nanahuatzin"]],
+["god","Cipactli","Earth monster","see-PAHK-tlee","Crocodile","Huge crocodile-like creature floating in the primordial waters. Its body became the earth.","Myths",["Tlaltecuhtli","Tezcatlipoca"]],
+["god","Tlaltecuhtli","","tlahl-teh-KOO-tlee","Earth Lord (or Lady)","The earth itself as a toothed monster. Tezcatlipoca and Quetzalcoatl tore it in two to make the earth and sky. It hungers for blood, and plants grow from its body.","Myths",["Cipactli","Tezcatlipoca","Quetzalcoatl"]],
+["god","Coatlicue","","koh-aht-LEE-kweh","Serpent Skirt","Earth mother. Pregnant from a ball of feathers while sweeping at Coatepec, which angered her other children. Mother of Huitzilopochtli.","Myths",["Huitzilopochtli","Coyolxauhqui","Coatepec"]],
+["god","Coyolxauhqui","","koh-yohl-SHAU-kee","Painted with Bells","Huitzilopochtli's sister. She led the 400 brothers against their mother and was cut to pieces; seen as the moon. Her carved stone disk was found at the Templo Mayor in 1978.","Myths",["Huitzilopochtli","Coatlicue","Centzon Huitznahua"]],
+["god","Centzon Huitznahua","The 400 Southerners","SEN-tsohn weets-NAH-wah","Four Hundred Southerners","Coatlicue's countless sons who attacked her alongside Coyolxauhqui. Huitzilopochtli scattered them; they became the southern stars.","Myths",["Coyolxauhqui","Huitzilopochtli"]],
+["god","Xiuhtecuhtli","Huehueteotl, Old God","shee-oo-teh-KOO-tlee","Turquoise Lord","Fire, time, and the year. Honored at the New Fire ceremony every 52 years.","Myths",["New Fire"]],
+["god","Mayahuel","","mah-YAH-wel","(goddess of the maguey)","Goddess of the maguey plant and pulque, the fermented sap drink. Shown with many breasts.","Myths",[]],
+["god","Centeotl","Cinteotl","sen-TEH-ohtl","Maize God","Young male god of corn.","Myths",["Chicomecoatl"]],
+["god","Chicomecoatl","","chee-koh-meh-KOH-ahtl","Seven Serpent","Goddess of corn, harvest, and food stores.","Myths",["Centeotl"]],
+["god","Xochiquetzal","","shoh-chee-KET-sahl","Flower Quetzal (Precious Flower)","Beauty, love, flowers, and weaving.","Myths",["Xochipilli","Tamoanchan"]],
+["god","Xochipilli","","shoh-chee-PEE-lee","Flower Prince","Art, music, dance, and pleasure.","Myths",["Xochiquetzal"]],
+["god","Tlazolteotl","","tlah-sohl-TEH-ohtl","Filth Goddess","Desire and wrongdoing, and also cleansing and confession: she 'eats the filth' of sin.","Myths",[]],
+["god","Itzpapalotl","","eets-pah-PAH-lohtl","Obsidian Butterfly","Fearsome warrior goddess with blade-edged wings, linked to Tamoanchan.","Myths",["Tamoanchan"]],
+["god","Mixcoatl","","mees-KOH-ahtl","Cloud Serpent","Hunting and the Milky Way. In some stories he is Quetzalcoatl's father.","Myths",[]],
+["god","Tlahuizcalpantecuhtli","","tlah-wees-kahl-pahn-teh-KOO-tlee","Lord of the Dawn","Venus as the morning star. A dangerous archer.","Myths",["Quetzalcoatl","Xolotl"]],
+["god","Cihuacoatl","","see-wah-KOH-ahtl","Woman Serpent","Mother goddess and patron of women who die in childbirth. Also the title of the Mexica 'second ruler' office held by Tlacaelel.","Both",["Tlacaelel"]],
+
+// ---------- RULERS ----------
+["ruler","Acamapichtli","","ah-kah-mah-PEECH-tlee","Handful of Reeds","First tlatoani (king) of Tenochtitlan, from the Culhuacan royal line. Fathered the dynasty through many wives.","Fifth Sun",["Culhuacan","Itzcoatl","Huitzilihuitl"]],
+["ruler","Huitzilihuitl","the younger (son of Acamapichtli)","weet-see-LEE-weetl","Hummingbird Feather","Second king. Married a granddaughter of the Tepanec king Tezozomoc for protection. Different from the elder Huitzilihuitl of 1299.","Fifth Sun",["Tezozomoc","Chimalpopoca","Huitzilihuitl the Elder"]],
+["ruler","Chimalpopoca","","chee-mahl-poh-POH-kah","Smoking Shield","Third king, grandson of Tezozomoc. Killed around 1427 during the Tepanec power struggle under Maxtla.","Fifth Sun",["Tezozomoc","Maxtla","Itzcoatl"]],
+["ruler","Itzcoatl","","eets-KOH-ahtl","Obsidian Serpent","Son of Acamapichtli by a low-status mother. He served his nephew's reign loyally, then took power in 1427. Allied with Texcoco and Tlacopan to defeat Azcapotzalco, which created the Triple Alliance. A central figure in Fifth Sun.","Fifth Sun",["Tlacaelel","Nezahualcoyotl","Triple Alliance","Azcapotzalco"]],
+["ruler","Moctezuma I","Moteuczoma Ilhuicamina, the Elder","mok-teh-SOO-mah eel-wee-kah-MEE-nah","He Who Grows Angry like a Lord; Archer of the Sky","Fifth king. Built the empire with his half-brother Tlacaelel. Ruled through the great famine of the 1450s.","Fifth Sun",["Tlacaelel","Axayacatl"]],
+["ruler","Axayacatl","","ah-shah-YAH-kahtl","Water Face","Sixth king, grandson of Moctezuma I. Crushed Tlatelolco in 1473 after its king Moquihuix mistreated Axayacatl's sister, Jade Doll. Father of Moctezuma II.","Fifth Sun",["Chalchiuhnenetzin","Moquihuix","Tlatelolco","Moctezuma II"]],
+["ruler","Tizoc","Tizocicatzin","TEE-sok","Chalk Leg (often rendered)","Seventh king, Axayacatl's brother. Short reign with few conquests; possibly poisoned.","Fifth Sun",["Axayacatl","Ahuitzotl"]],
+["ruler","Ahuitzotl","","ah-WEET-sohtl","Water Thorny Thing (a water creature)","Eighth king, another brother. Pushed the empire to the Pacific and the Guatemala border. Expanded the Templo Mayor in 1487.","Fifth Sun",["Tizoc","Moctezuma II"]],
+["ruler","Moctezuma II","Moteuczoma Xocoyotzin, the Younger","mok-teh-SOO-mah shoh-koh-YOHT-seen","He Who Grows Angry like a Lord; the Younger","Ninth king, son of Axayacatl. Met Cortés on the causeway on November 8, 1519. Held captive by the Spanish and died in 1520. Townsend overturns the old 'he thought Cortés was a god' story.","Both",["Hernando Cortés","Malintzin","Tecuichpotzin","Cuitlahuac"]],
+["ruler","Cuitlahuac","","kweet-LAH-wak","(often rendered 'Dried Excrement' or 'Steward')","Moctezuma II's brother. Led the uprising that drove the Spanish out in 1520 ('La Noche Triste'), then died of smallpox within months.","Fifth Sun",["Moctezuma II","Cuauhtemoc","Tecuichpotzin"]],
+["ruler","Cuauhtemoc","","kwau-TEH-mok","Descending Eagle","Last king, a cousin. Led the defense of Tenochtitlan until it fell on August 13, 1521. Tortured for gold and hanged by Cortés in 1525.","Both",["Cuitlahuac","Hernando Cortés","Tecuichpotzin"]],
+
+// ---------- PEOPLE ----------
+["person","Huitzilihuitl the Elder","","weet-see-LEE-weetl","Hummingbird Feather","Mexica war leader during the wandering years. Defeated and captured at Chapultepec around 1299.","Fifth Sun",["Chimallaxochitl","Chapultepec"]],
+["person","Chimallaxochitl","Shield Flower","chee-mahl-lah-SHOH-cheetl","Shield Flower","Daughter of Huitzilihuitl the Elder. Captured after the defeat at Chapultepec, she chose sacrifice over shaming by her captors. Townsend opens with her story.","Fifth Sun",["Huitzilihuitl the Elder","Chapultepec"]],
+["person","Tenoch","","TEH-nohch","Stone Prickly Pear","Legendary leader when the Mexica founded Tenochtitlan around 1325, where they saw an eagle on a cactus.","Fifth Sun",["Tenochtitlan"]],
+["person","Tezozomoc","of Azcapotzalco","teh-soh-SOH-mok","Angry Stone (often rendered)","Long-lived Tepanec king of Azcapotzalco. The Mexica served him for decades and his blood ran in their royal line. Don't mix him up with the later chronicler of the same name.","Fifth Sun",["Azcapotzalco","Maxtla","Chimalpopoca","Hernando Alvarado Tezozomoc"]],
+["person","Maxtla","","MAHSH-tlah","Loincloth","Tezozomoc's son, who seized the Tepanec throne. Overthrown by Itzcoatl and Nezahualcoyotl in 1428.","Fifth Sun",["Tezozomoc","Itzcoatl"]],
+["person","Tlacaelel","","tlah-kah-EH-lel","Manly Heart (often rendered)","Half-brother of Moctezuma I and the power behind several kings. Held the cihuacoatl office for decades and is credited with shaping Mexica state ideology.","Fifth Sun",["Moctezuma I","Itzcoatl","Cihuacoatl"]],
+["person","Nezahualcoyotl","","neh-sah-wahl-KOH-yohtl","Fasting Coyote","Poet-king of Texcoco. Spent years in exile, then helped Itzcoatl defeat the Tepanecs and became a Triple Alliance partner.","Fifth Sun",["Texcoco","Itzcoatl","Nezahualpilli"]],
+["person","Nezahualpilli","","neh-sah-wahl-PEE-lee","Fasting Prince","Son of Nezahualcoyotl and king of Texcoco. Known as a seer.","Fifth Sun",["Nezahualcoyotl","Cacamatzin"]],
+["person","Chalchiuhnenetzin","Jade Doll","chahl-chee-oo-neh-NEHT-seen","Jade Doll","Axayacatl's sister, married to Moquihuix of Tlatelolco. Her mistreatment became the trigger for the 1473 war.","Fifth Sun",["Moquihuix","Axayacatl","Tlatelolco"]],
+["person","Moquihuix","","moh-KEE-weesh","","King of Tlatelolco. Lost the 1473 war with Axayacatl and died; Tlatelolco lost its independence.","Fifth Sun",["Chalchiuhnenetzin","Axayacatl","Tlatelolco"]],
+["person","Cacamatzin","","kah-kah-MAHT-seen","","King of Texcoco and Moctezuma II's nephew. Held by the Spanish and killed in 1520.","Fifth Sun",["Nezahualpilli","Moctezuma II"]],
+["person","Malintzin","Doña Marina, La Malinche","mah-LEEN-tseen","Honored Marina (Malin + -tzin)","Nahua noblewoman sold into slavery among the Maya, then given to the Spanish. Became Cortés's interpreter and the indispensable voice of the conquest. Townsend rejects the 'traitor' label.","Both",["Hernando Cortés","Jerónimo de Aguilar","Martín Cortés"]],
+["person","Tecuichpotzin","Doña Isabel Moctezuma","teh-kweech-POHT-seen","Royal Daughter (approx.)","Daughter of Moctezuma II. Married first Cuitlahuac, then Cuauhtemoc, and later Spaniards. Survived to become a wealthy landholder. A major thread in Fifth Sun.","Fifth Sun",["Moctezuma II","Cuitlahuac","Cuauhtemoc"]],
+["person","Hernando Cortés","Hernán Cortés","","","Spanish leader of the 1519–1521 invasion.","Both",["Malintzin","Moctezuma II","Pedro de Alvarado"]],
+["person","Jerónimo de Aguilar","","","","Spaniard shipwrecked among the Maya who learned Maya. Early on he relayed Malintzin's Maya into Spanish.","Fifth Sun",["Malintzin"]],
+["person","Pedro de Alvarado","Tonatiuh (Nahua nickname)","","","Cortés's captain. Led the massacre at the Toxcatl festival in 1520, which set off the uprising. The Nahuas called him Tonatiuh, 'the Sun', for his blond hair.","Fifth Sun",["Hernando Cortés","Tonatiuh"]],
+["person","Xicotencatl","the Younger","shee-koh-TEN-kahtl","Bumblebee Lip (often rendered)","Tlaxcalan war leader. Fought the Spanish, then resisted the alliance with them; executed by Cortés in 1521.","Fifth Sun",["Tlaxcala"]],
+["person","Martín Cortés","","","","Son of Malintzin and Cortés.","Fifth Sun",["Malintzin","Hernando Cortés"]],
+["person","Don Diego Huanitzin","","wah-NEET-seen","","Grandson of Axayacatl. Served as governor of Tenochtitlan under Spanish rule (from 1539), keeping Mexica rule alive in a new form.","Fifth Sun",["Axayacatl"]],
+["person","Chimalpahin","Don Domingo Chimalpahin","chee-mahl-PAH-een","Runs Swiftly with Shield (approx.)","17th-century annalist from Chalco who copied and wrote many of the Nahuatl annals Townsend relies on.","Fifth Sun",["Chalco","Xiuhamatl"]],
+["person","Hernando Alvarado Tezozomoc","the chronicler","teh-soh-SOH-mok","","Grandson of Moctezuma II, writing around 1600. Author tradition behind the Crónica Mexicayotl. Not the Tepanec king.","Fifth Sun",["Tezozomoc","Moctezuma II"]],
+
+// ---------- PLACES & TERMS ----------
+["place","Mexica","Aztecs","meh-SHEE-kah","","What the 'Aztecs' called themselves. 'Aztec' is a later label from Aztlan.","Both",["Aztlan","Tenochtitlan"]],
+["place","Aztlan","","AHS-tlahn","Place of Herons (traditional reading)","Legendary northern homeland the Mexica left on their migration.","Both",["Huitzilopochtli"]],
+["place","Tenochtitlan","","teh-nohch-TEET-lahn","Place of the Prickly Pear on the Rock","Mexica capital on an island in Lake Texcoco, founded c.1325. Today's Mexico City.","Both",["Tenoch","Tlatelolco"]],
+["place","Tlatelolco","","tlah-teh-LOHL-koh","","Twin Mexica city on the same island, home of the great market. Independent until 1473; the last stand of 1521 was here.","Fifth Sun",["Moquihuix","Chalchiuhnenetzin"]],
+["place","Texcoco","","tesh-KOH-koh","","Acolhua city across the lake and Triple Alliance partner.","Fifth Sun",["Nezahualcoyotl","Triple Alliance"]],
+["place","Tlacopan","Tacuba","tlah-KOH-pahn","","Tepanec town; the junior Triple Alliance partner.","Fifth Sun",["Triple Alliance"]],
+["place","Triple Alliance","Excan Tlatoloyan","","","Tenochtitlan + Texcoco + Tlacopan, formed around 1428. This is what we call 'the Aztec Empire'.","Fifth Sun",["Itzcoatl","Texcoco","Tlacopan"]],
+["place","Azcapotzalco","Tepanecs","ahs-kah-poht-SAHL-koh","Anthill Place","Capital of the Tepanecs, the regional power the Mexica served until 1428.","Fifth Sun",["Tezozomoc","Maxtla"]],
+["place","Chapultepec","","chah-POOL-teh-pek","Grasshopper Hill","Hill where the wandering Mexica settled and were defeated around 1299.","Fifth Sun",["Chimallaxochitl","Huitzilihuitl the Elder"]],
+["place","Culhuacan","Culhua","kool-WAH-kahn","","Old city claiming Toltec descent. The Mexica served there, and Acamapichtli's royal blood came from it.","Fifth Sun",["Acamapichtli"]],
+["place","Tlaxcala","","tlahsh-KAH-lah","Place of Tortillas","Independent enemy state that was never conquered by the Mexica. Became the key Spanish ally.","Fifth Sun",["Xicotencatl"]],
+["place","Chalco","","CHAHL-koh","","Lakeside region, long at war with the Mexica. Chimalpahin's homeland.","Fifth Sun",["Chimalpahin"]],
+["place","Teotihuacan","","teh-oh-tee-WAH-kahn","Place Where the Gods Were Made","Ancient ruined city, already old to the Mexica. In myth, where the Fifth Sun was born.","Both",["Nanahuatzin","Tecuciztecatl"]],
+["place","Coatepec","","koh-AH-teh-pek","Serpent Hill","Where Huitzilopochtli was born and defeated Coyolxauhqui. The Templo Mayor re-creates it.","Myths",["Coatlicue","Huitzilopochtli"]],
+["place","Mictlan","","MEEKT-lahn","Place of the Dead","Nine-level underworld that most of the dead cross over four years, helped by a dog.","Myths",["Mictlantecuhtli","Xolotl"]],
+["place","Tlalocan","","tlah-LOH-kahn","Place of Tlaloc","Green paradise for people who died by drowning, lightning, or water-related disease.","Myths",["Tlaloc"]],
+["place","Tamoanchan","","tah-moh-AHN-chahn","","Mythic paradise of origins, where gods and humans were created and where maize was found.","Myths",["Xochiquetzal","Itzpapalotl"]],
+["place","Tlatoani","huey tlatoani","tlah-toh-AH-nee","Speaker","Ruler of a city-state. Huey tlatoani = 'great speaker', the Mexica emperor.","Both",[]],
+["place","Altepetl","","ahl-TEH-petl","Water-Mountain","City-state: the basic political unit, with its own ruler, god, and lands.","Fifth Sun",[]],
+["place","Xiuhamatl","annals","shee-oo-AH-mahtl","Year Paper","Year-by-year annals written in Nahuatl after the conquest. Townsend's main source.","Fifth Sun",["Chimalpahin"]],
+["place","Pipiltin / Macehualtin","","pee-PEEL-teen / mah-seh-WAHL-teen","Nobles / Commoners","The two broad social classes.","Fifth Sun",[]],
+["place","New Fire","Xiuhmolpilli","shee-oo-mohl-PEE-lee","Binding of the Years","Ceremony every 52 years when the two calendars realign. All fires were put out and relit, or the world might end.","Both",["Xiuhtecuhtli"]],
+["place","Tonalpohualli / Xiuhpohualli","","toh-nahl-poh-WAH-lee / shee-oo-poh-WAH-lee","Day count / Year count","260-day sacred calendar and 365-day solar calendar. Day names like '4 Movement' come from the first.","Myths",["New Fire"]],
+["place","Toxcatl","","TOHSH-kahtl","","May festival of Tezcatlipoca. Alvarado's massacre during it in 1520 set off the revolt.","Fifth Sun",["Pedro de Alvarado","Tezcatlipoca"]],
+];
+
+const ICON={"Ometeotl": "two", "Tezcatlipoca": "mirror", "Quetzalcoatl": "featherserpent", "Huitzilopochtli": "hummingbird", "Xipe Totec": "sprout", "Tlaloc": "tlaloc", "Chalchiuhtlicue": "waterskirt", "Ehecatl": "wind", "Mictlantecuhtli": "skull", "Mictecacihuatl": "skullhair", "Xolotl": "dog", "Nanahuatzin": "sunfire", "Tecuciztecatl": "moonrabbit", "Tonatiuh": "sun", "Cipactli": "croc", "Tlaltecuhtli": "earthjaw", "Coatlicue": "serpentskirt", "Coyolxauhqui": "bells", "Centzon Huitznahua": "stars", "Xiuhtecuhtli": "flame", "Mayahuel": "maguey", "Centeotl": "corn", "Chicomecoatl": "sevenserpent", "Xochiquetzal": "flowerfeather", "Xochipilli": "flower", "Tlazolteotl": "broom", "Itzpapalotl": "butterfly", "Mixcoatl": "cloud", "Tlahuizcalpantecuhtli": "venus", "Cihuacoatl": "coil", "Acamapichtli": "handreeds", "Huitzilihuitl": "feather", "Chimalpopoca": "smokeshield", "Itzcoatl": "obsidianserpent", "Moctezuma I": "arrowsky", "Axayacatl": "waterface", "Tizoc": "leg", "Ahuitzotl": "watercreature", "Moctezuma II": "diadem", "Cuitlahuac": "lakereeds", "Cuauhtemoc": "eagledown", "Huitzilihuitl the Elder": "feather", "Chimallaxochitl": "shieldflower", "Tenoch": "cactusrock", "Tezozomoc": "stone", "Maxtla": "cloth", "Tlacaelel": "heart", "Nezahualcoyotl": "coyote", "Nezahualpilli": "coyote", "Chalchiuhnenetzin": "doll", "Moquihuix": "person", "Cacamatzin": "person", "Malintzin": "speech", "Tecuichpotzin": "diadem", "Hernando Cortés": "ship", "Jerónimo de Aguilar": "speech", "Pedro de Alvarado": "sword", "Xicotencatl": "bee", "Martín Cortés": "child", "Don Diego Huanitzin": "staff", "Chimalpahin": "book", "Hernando Alvarado Tezozomoc": "book", "Mexica": "eaglecactus", "Aztlan": "heron", "Tenochtitlan": "cactusrock", "Tlatelolco": "basket", "Texcoco": "hill", "Tlacopan": "hill", "Triple Alliance": "three", "Azcapotzalco": "ant", "Chapultepec": "grasshopperhill", "Culhuacan": "benthill", "Tlaxcala": "tortilla", "Chalco": "hill", "Teotihuacan": "pyramid", "Coatepec": "serpenthill", "Mictlan": "stairsdown", "Tlalocan": "drop", "Tamoanchan": "tree", "Tlatoani": "speech", "Altepetl": "watermountain", "Xiuhamatl": "book", "Pipiltin / Macehualtin": "twofig", "New Fire": "newfire", "Tonalpohualli / Xiuhpohualli": "calendar", "Toxcatl": "mirror"};
+const IMG={"Tezcatlipoca": ["Black Tezcatlipoca clean.jpg", "Black Tezcatlipoca, Codex Borgia", "Public domain"], "Quetzalcoatl": ["Quetzalcoatl 1.jpg", "Quetzalcoatl, Codex Borbonicus", "Public domain"], "Huitzilopochtli": ["Huitzilopochtli telleriano.jpg", "Huitzilopochtli, Codex Telleriano-Remensis f.5r", "Public domain"], "Xipe Totec": ["Xipe Totec (Codex Borbonicus p.27).png", "Wearer of Xipe Totec's flayed skin, Codex Borbonicus p.27", "Public domain"], "Tlaloc": ["Tlaloc Codex Borgia.jpg", "Tlaloc, from Codex Borgia p.67", "Public domain"], "Chalchiuhtlicue": ["Chalchiuhtli icue Codex Fejérváry-Mayer 33.jpg", "Chalchiuhtlicue, Codex Fejérváry-Mayer p.33", "Public domain"], "Ehecatl": ["Quetzalcoatl Ehecatl.jpg", "Quetzalcoatl as Ehecatl the wind god, Codex Borgia", "Public domain"], "Mictlantecuhtli": ["Codex Borgia page 56.jpg", "Mictlantecuhtli (left) back to back with Quetzalcoatl, Codex Borgia p.56", "Public domain"], "Mictecacihuatl": ["Mictlancihuatl.jpg", "Mictecacihuatl, drawn from Codex Borgia", "Public domain"], "Xolotl": ["Xolotl, Codex Borgia page 37.jpg", "Xolotl hurling lightning, Codex Borgia p.37", "Public domain"], "Tecuciztecatl": ["Tecciztecatl.jpg", "Tecuciztecatl, from Codex Borgia", "Public domain"], "Tonatiuh": ["File-Monolito de la Piedra del Sol (centro).jpg", "The face at the center of the Sun Stone", "Photo: El Comandante, CC BY-SA 3.0"], "Cipactli": ["Codex Magliabechiano 11R.jpg", "Day signs Flint, Rain, Flower and Crocodile (Cipactli), Codex Magliabechiano", "Public domain"], "Coatlicue": ["Nacimiento de Huitzilopochtli.jpg", "Coatlicue and the birth of Huitzilopochtli, Florentine Codex bk.3", "Public domain"], "Coyolxauhqui": ["Coyolxauhqui stone.jpg", "The Coyolxauhqui Stone, Templo Mayor Museum", "Photo: Iris (Culemborg), CC BY"], "Xiuhtecuhtli": ["Codex Borbonicus (p. 9).jpg", "Codex Borbonicus p.9, a trecena with Xiuhtecuhtli", "Public domain"], "Mayahuel": ["Codex Borbonicus (p. 8).jpg", "Codex Borbonicus p.8, the trecena of Mayahuel", "Public domain"], "Centeotl": ["Centeotl.jpg", "Centeotl, Codex Ríos", "Public domain"], "Chicomecoatl": ["Chicomecouatl-Cinteotl Codex Fejérváry-Mayer 36-4.jpg", "Chicomecoatl and Centeotl, Codex Fejérváry-Mayer p.36", "Public domain"], "Xochiquetzal": ["Xochiquetzal-Xochipilli Codex Fejérváry-Mayer 35-4.jpg", "Xochiquetzal and Xochipilli, Codex Fejérváry-Mayer p.35", "Public domain"], "Xochipilli": ["Xochiquetzal-Xochipilli Codex Fejérváry-Mayer 35-4.jpg", "Xochiquetzal and Xochipilli, Codex Fejérváry-Mayer p.35", "Public domain"], "Tlazolteotl": ["TlazolteotlBorbonicus.jpg", "Tlazolteotl giving birth to Centeotl, Codex Borbonicus", "Public domain"], "Itzpapalotl": ["Itzpapalotl 1.jpg", "Itzpapalotl, drawn from Codex Borgia p.66", "Public domain"], "Mixcoatl": ["Mixcoatl telleriano-remensis.jpg", "Mixcoatl, Codex Telleriano-Remensis", "Public domain"], "Acamapichtli": ["Acamapichtli, - 1387, 1395 o 1403, retrato anónimo (~1541).png", "Acamapichtli with his name glyph, Codex Mendoza", "Public domain"], "Itzcoatl": ["Codex Mendoza folio 5v.jpg", "Itzcoatl's reign and conquests, Codex Mendoza f.5v", "Public domain"], "Moctezuma I": ["Huehuemoteuczoma mendoza.jpg", "Moctezuma I, Codex Mendoza", "Public domain"], "Axayacatl": ["Axayácatl, the Sixth Aztec King (Reigned 1469–81) WDL6723.png", "Axayacatl, Codex Tovar", "Public domain"], "Tizoc": ["Tizoc, the Seventh Aztec King (Reigned 1481–86) WDL6722.png", "Tizoc, Codex Tovar", "Public domain"], "Ahuitzotl": ["Codex Mendoza folio 13r.jpg", "Ahuitzotl's reign and conquests, Codex Mendoza f.13r", "Public domain"], "Moctezuma II": ["Codex Mendoza folio 15v.jpg", "Moctezuma II's reign and conquests, Codex Mendoza f.15v", "Public domain"], "Nezahualcoyotl": ["Plancha IX del Códice Xolotl (detalle), Nezahualcóyotl habla con Huitziltetzin y se oculta entre plantas de chía.jpg", "Nezahualcoyotl in exile hiding among chia plants, Codex Xolotl pl.IX", "Public domain"], "Malintzin": ["Cortez & La Malinche.jpg", "Malintzin interpreting as Cortés meets Moctezuma, Lienzo de Tlaxcala", "Public domain"], "Hernando Cortés": ["Lienzo de Tlaxcala Teciquauhtitla.jpg", "Cortés and Malintzin with Tlaxcalan allies, Lienzo de Tlaxcala", "Public domain"], "Xicotencatl": ["Cortés Greets Xicotencatl.jpg", "Cortés greets Xicotencatl, Lienzo de Tlaxcala", "Public domain"], "Mexica": ["Codex Mendoza folio 2r.jpg", "Founding of Tenochtitlan: eagle on the cactus, Codex Mendoza f.2r", "Public domain"], "Tenochtitlan": ["Codex Mendoza folio 2r.jpg", "Founding of Tenochtitlan, Codex Mendoza f.2r", "Public domain"], "Tenoch": ["Codex Mendoza folio 2r.jpg", "Tenoch (seated beside the eagle), Codex Mendoza f.2r", "Public domain"], "Mictlan": ["9infiernos.png", "The nine levels of the underworld, Codex Ríos", "Public domain"], "Tamoanchan": ["Tamoanchan Codex Telleriano-Remensis.jpg", "Tamoanchan, Codex Telleriano-Remensis", "Public domain"], "Tonalpohualli / Xiuhpohualli": ["Codex Borbonicus (p. 13).jpg", "One 13-day period of the 260-day count, Codex Borbonicus p.13", "Public domain"], "Toxcatl": ["Toxcatl, Drought, the Fifth Month of the Aztec Solar Calendar WDL6736.png", "The month Toxcatl, Codex Tovar", "Public domain"], "Altepetl": ["Codice Mendoza.jpg", "Axayacatl's conquered altepetl, each a hill-glyph, Codex Mendoza", "Public domain"]};
+const SUN=["Piedra del Sol en MNA.jpg", "The Sun Stone, National Museum of Anthropology, Mexico City. The Five Suns surround the central face.", "Photo: Juan Carlos Fonseca Mata, CC BY-SA 4.0"];
+const fp=(f,w)=>"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(f.replace(/ /g,"_"))+"?width="+w;
+const page=f=>"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(f.replace(/ /g,"_"));
+function figHTML(im,cls){const [f,cap,cr]=im;return `<figure class="fig ${cls||""}"><button type="button" data-f="${esc(f)}" data-cap="${esc(cap)}" data-cr="${esc(cr)}" aria-label="Enlarge: ${esc(cap)}"><img loading="lazy" decoding="async" src="${fp(f,480)}" alt="${esc(cap)}" onerror="this.closest('figure').classList.add('hide')"></button><figcaption>${esc(cap)}. <a href="${page(f)}" target="_blank" rel="noopener">${esc(cr)}</a></figcaption></figure>`;}
+const COLORS={god:"var(--god)",ruler:"var(--ruler)",person:"var(--person)",place:"var(--place)"};
+const LABEL={god:"God / myth",ruler:"Mexica ruler",person:"Person",place:"Place / term"};
+const fold=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const cardsEl=document.getElementById("cards"),q=document.getElementById("q"),countEl=document.getElementById("count"),emptyEl=document.getElementById("empty"),intro=document.getElementById("intro");
+let filter="all";
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nodes=D.map(([k,name,alt,say,means,role,book,rel])=>{
+  const el=document.createElement("article");
+  el.className="card"; el.style.setProperty("--c",COLORS[k]);
+  el.innerHTML=`<div class="chead"><div class="glyph"><svg aria-hidden="true"><use href="#i-${ICON[name]||"person"}"/></svg></div><div><h3>${esc(name)}</h3>`+
+   (alt?`<div class="alt">${esc(alt)}</div>`:"")+`</div></div>`+
+   (say?`<div class="say">Say: <span>${esc(say)}</span></div>`:"")+
+   (means?`<div class="means">"${esc(means)}"</div>`:"")+
+   `<p class="role">${esc(role)}</p>`+(IMG[name]?figHTML(IMG[name]):"")+
+   `<div class="meta"><span class="tag">${LABEL[k]}</span><span class="book">${book==="Both"?"Both books":book==="Myths"?"Torres (myths)":"Townsend (Fifth Sun)"}</span>`+
+   rel.map(r=>`<button class="rel" type="button" data-r="${esc(r)}">${esc(r)}</button>`).join("")+`</div>`;
+  cardsEl.appendChild(el);
+  return {el,k,hay:fold([name,alt,means,role].join(" "))};
+});
+function apply(){
+  const t=fold(q.value.trim());
+  let n=0;
+  nodes.forEach(o=>{const ok=(filter==="all"||o.k===filter)&&(!t||o.hay.includes(t));o.el.classList.toggle("hide",!ok);if(ok)n++;});
+  intro.classList.toggle("hide",!!t);
+  countEl.textContent=`${n} ${n===1?"entry":"entries"}`;
+  emptyEl.classList.toggle("hide",n>0);
+}
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+  filter=b.dataset.f;
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false"));
+  apply();
+}));
+q.addEventListener("input",apply);
+cardsEl.addEventListener("click",e=>{
+  const r=e.target.closest(".rel"); if(!r) return;
+  q.value=r.dataset.r; filter="all";
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.f==="all"?"true":"false"));
+  apply(); document.getElementById("dirhead").scrollIntoView({behavior:"smooth",block:"start"});
+});
+apply();
+
+document.getElementById("sunfig").innerHTML=figHTML(SUN,"sunfig");
+const lb=document.getElementById("lb"),lbimg=document.getElementById("lbimg"),lbcap=document.getElementById("lbcap");
+let lastFocus=null;
+document.addEventListener("click",e=>{const b=e.target.closest(".fig button");if(!b)return;lastFocus=b;lbimg.src=fp(b.dataset.f,1400);lbimg.alt=b.dataset.cap;lbcap.innerHTML=esc(b.dataset.cap)+". <a href=\""+page(b.dataset.f)+"\" target=\"_blank\" rel=\"noopener\">"+esc(b.dataset.cr)+"</a>";lb.classList.remove("hide");document.getElementById("lbx").focus();});
+function closeLb(){lb.classList.add("hide");lbimg.removeAttribute("src");if(lastFocus)lastFocus.focus();}
+document.getElementById("lbx").addEventListener("click",closeLb);
+lb.addEventListener("click",e=>{if(e.target===lb)closeLb();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!lb.classList.contains("hide"))closeLb();});
+const allImgs=()=>{const set=new Set([fp(SUN[0],480)]);Object.values(IMG).forEach(v=>set.add(fp(v[0],480)));return [...set];};
+const saveBtn=document.getElementById("savebtn"),saveMsg=document.getElementById("savemsg");
+if(!("caches" in window)){saveBtn.classList.add("hide");}
+saveBtn.addEventListener("click",async()=>{
+  saveBtn.disabled=true;const urls=allImgs();let ok=0;
+  try{const c=await caches.open("aztec-img-v1");
+    for(const u of urls){try{if(!(await c.match(u))){const r=await fetch(u,{mode:"no-cors"});await c.put(u,r);}ok++;}catch(e){}saveMsg.textContent=`Saving images: ${ok} of ${urls.length}`;}
+    saveMsg.textContent=ok===urls.length?`All ${ok} images saved. The app now works offline.`:`Saved ${ok} of ${urls.length}. Tap again with a better signal to finish.`;
+  }catch(e){saveMsg.textContent="Your browser blocked offline storage, so images still need a connection.";}
+  saveBtn.disabled=false;
+});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
+</script>
+</body>
+</html>

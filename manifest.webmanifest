@@ -1,0 +1,15 @@
+{
+  "name": "Aztec Who's Who",
+  "short_name": "Aztec Who's Who",
+  "description": "Listening companion for Fifth Sun and Myths, Gods, and Rituals of Aztec Mythology: gods, rulers, people and places with pronunciations and codex images.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef0ec",
+  "theme_color": "#0d6b58",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
