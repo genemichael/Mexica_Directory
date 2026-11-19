@@ -72,7 +72,7 @@ h2{font-family:var(--display);font-weight:600;font-size:21px;margin:26px 0 10px;
 .rulers .ds{color:var(--muted);font-size:15px}
 .count{color:var(--muted);font-size:15px;margin:0 0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.card{scroll-margin-top:130px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
 .chead{display:flex;gap:12px;align-items:center}
 .glyph{flex:none;width:56px;height:56px;border-radius:12px;background:color-mix(in srgb,var(--c) 13%,var(--surface));color:var(--c);display:grid;place-items:center}
 .glyph svg{width:46px;height:46px}
@@ -327,6 +327,18 @@ cardsEl.addEventListener("click",e=>{
   apply(); document.getElementById("dirhead").scrollIntoView({behavior:"smooth",block:"start"});
 });
 apply();
+// Deep links: index.html#Xolotl (spaces as hyphens) searches for that entry and scrolls to it.
+function fromHash(){
+  let h="";try{h=decodeURIComponent(location.hash.slice(1));}catch(e){h=location.hash.slice(1);}
+  h=h.replace(/-/g," ").trim(); if(!h) return;
+  q.value=h; filter="all";
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.f==="all"?"true":"false"));
+  apply();
+  const hit=nodes.find(o=>fold(o.el.querySelector("h3").textContent)===fold(h));
+  (hit?hit.el:document.getElementById("dirhead")).scrollIntoView({block:"start"});
+}
+fromHash();
+window.addEventListener("hashchange",fromHash);
 
 document.getElementById("sunfig").innerHTML=figHTML(SUN,"sunfig");
 const lb=document.getElementById("lb"),lbimg=document.getElementById("lbimg"),lbcap=document.getElementById("lbcap");

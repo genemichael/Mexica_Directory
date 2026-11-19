@@ -1,7 +1,8 @@
 // App shell: cache-first, refreshed in the background. Wikimedia images: cache-first, saved on first view.
-const SHELL = "aztec-shell-v3";
+const SHELL = "aztec-shell-v4";
 const IMGS = "aztec-img-v1";
-const SHELL_FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
+const SHELL_FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
+  "creation/", "creation/index.html", "creation/manifest.webmanifest", "creation/icon-192.png", "creation/icon-512.png", "creation/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(SHELL).then(c => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));

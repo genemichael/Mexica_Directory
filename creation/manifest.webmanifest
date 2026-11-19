@@ -1,0 +1,15 @@
+{
+  "name": "Creation Walkthrough",
+  "short_name": "Creation",
+  "description": "Step-by-step guide to the Nahua creation story, from the dual creator to the Fifth Sun, for listening along with Fifth Sun and Myths, Gods, and Rituals of Aztec Mythology.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2eee6",
+  "theme_color": "#7d4a0e",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
