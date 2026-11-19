@@ -74,13 +74,16 @@ This outline is from general knowledge and has not been checked against the prim
 8. **Fourth Sun, 4 Water.** Chalchiuhtlicue's age; the flood; people become fish. Include the flood survivors Tata and Nene, whom Tezcatlipoca turns into dogs for lighting a fire. Main source for steps 5 to 8: *Leyenda de los Soles* (1558, in the Codex Chimalpopoca). The *Historia de los mexicanos por sus pinturas* gives a different order; show it as a "Versions differ" note.
 9. **The bones from Mictlan.** Quetzalcoatl (with his nahual, often Xolotl) goes to Mictlantecuhtli for the bones of earlier humans: the conch with no holes, worms and bees, the trap pit, the broken bones. Cihuacoatl (Quilaztli) grinds them and the gods bleed on them to make new people. Source: *Leyenda de los Soles*.
 10. **Maize from the Mountain of Sustenance.** Quetzalcoatl as an ant reaches the maize inside Tonacatepetl; Nanahuatzin splits the mountain; the Tlaloque scatter the seeds. Source: *Leyenda de los Soles*.
-11. **Pulque and Mayahuel.** Source: *Histoyre du Mechique*. Optional; confirm with the user.
+11. **Pulque and Mayahuel.** Source: *Histoyre du Mechique*.
 12. **The fire at Teotihuacan.** Nanahuatzin leaps without hesitation; Tecuciztecatl follows; two suns; the rabbit thrown at the moon. Source: Florentine Codex, Book 7.
 13. **The sun will not move.** The gods give their own lives; Ehecatl blows the sun into motion; Xolotl flees by changing into maize, maguey and an axolotl. Source: Florentine Codex, Book 7.
 14. **Our age, 4 Movement.** The Fifth Sun, fed by sacrifice and foretold to end in earthquakes. Show the Sun Stone photo with the four earlier Suns in their cartouches.
-15. **Epilogue, Coatepec.** The birth of Huitzilopochtli, Coatlicue, Coyolxauhqui and the 400 Southerners; why the Templo Mayor re-creates the hill. Source: Florentine Codex, Book 3. Optional; confirm with the user.
+15. **Epilogue, Coatepec.** The birth of Huitzilopochtli, Coatlicue, Coyolxauhqui and the 400 Southerners; why the Templo Mayor re-creates the hill. Source: Florentine Codex, Book 3.
 
-Before building, ask the user whether to follow the order Torres uses in his book (the user can check while listening) and whether steps 11 and 15 belong in this app.
+### Decisions already made by the user
+
+- **Order of the Suns:** follow the order Torres uses in his book. The user will confirm that order while listening. Until he does, build with the *Leyenda de los Soles* order shown above, keep the order of steps 5 to 8 in one easy-to-change array, and ask him once at the start of the session whether he has confirmed Torres's order yet.
+- **Steps 11 and 15:** include both (pulque and Mayahuel, and the Coatepec epilogue).
 
 ## Images already verified on Commons (from the `IMG` constant)
 
